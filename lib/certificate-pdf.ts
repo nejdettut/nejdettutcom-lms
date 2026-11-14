@@ -13,9 +13,13 @@ const TR_ASCII: Record<string, string> = {
   "ö": "o", "Ö": "O",
   "ç": "c", "Ç": "C",
   "·": "-", "—": "-", "–": "-",
+  "�": "?", // replacement char — appears when upstream encoding dropped bytes
 };
 function ascii(s: string): string {
-  return s.replace(/[ıİşŞğĞüÜöÖçÇ·—–]/g, (ch) => TR_ASCII[ch] ?? ch);
+  // First replace known chars; then strip anything still outside WinAnsi safe range
+  // (0x20-0x7E ASCII + Latin-1 Supplement 0xA0-0xFF).
+  const mapped = s.replace(/[ıİşŞğĞüÜöÖçÇ·—–�]/g, (ch) => TR_ASCII[ch] ?? ch);
+  return mapped.replace(/[^\x20-\x7E\xA0-\xFF]/g, "?");
 }
 
 type Input = {
