@@ -215,7 +215,7 @@ export async function renderCertificatePdf(input: Input): Promise<Uint8Array> {
   // Page footer
   page.drawText(
     "nejdettut.com — Bu sertifika yukarıdaki kodla çevrimiçi doğrulanabilir.",
-    { x: 70, y: 60, size: 9, font: inter, color: ink },
+    { x: 70, y: 60, size: 9, font: sans, color: ink },
   );
 
   return pdf.save();
