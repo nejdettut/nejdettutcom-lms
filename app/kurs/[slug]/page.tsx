@@ -114,13 +114,13 @@ export default async function CoursePage({
     <main className="mx-auto max-w-6xl px-6 py-10 sm:py-14">
       <Link
         href="/"
-        className="inline-flex items-center gap-1 text-xs font-medium text-brand-violet hover:underline"
+        className="inline-flex items-center gap-1 text-xs font-medium text-brand-sky hover:underline"
       >
         <ArrowLeft className="size-3.5" />
         Tüm kurslar
       </Link>
       <header className="mt-6 mb-10">
-        <p className="text-xs font-semibold uppercase tracking-widest text-brand-violet">
+        <p className="text-xs font-semibold uppercase tracking-widest text-brand-sky">
           Kurs
         </p>
         <h1 className="mt-2 text-2xl font-bold tracking-tight text-slate-900 sm:text-3xl dark:text-slate-100">
@@ -146,7 +146,7 @@ export default async function CoursePage({
               className="rounded-2xl border border-slate-200 bg-white/80 p-5 shadow-sm backdrop-blur dark:border-slate-800 dark:bg-slate-900/60"
             >
               <div className="mb-3 flex items-center gap-2">
-                <span className="rounded-full bg-brand-violet/10 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wider text-brand-violet">
+                <span className="rounded-full bg-brand-sky/10 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wider text-brand-sky">
                   Modül {mi + 1}
                 </span>
                 <h2 className="text-base font-bold text-slate-900 dark:text-slate-100">
@@ -166,7 +166,7 @@ export default async function CoursePage({
                       className="rounded-xl border border-slate-200 bg-slate-50/60 p-4 dark:border-slate-800 dark:bg-slate-950/40"
                     >
                       <div className="mb-2 flex items-center gap-2">
-                        <BookOpen className="size-3.5 text-brand-violet" />
+                        <BookOpen className="size-3.5 text-brand-sky" />
                         <h3 className="text-sm font-semibold text-slate-900 dark:text-slate-100">
                           {mi + 1}.{li + 1} {l.title}
                         </h3>
@@ -185,7 +185,7 @@ export default async function CoursePage({
 
                       {l.content ? (
                         <details className="mb-3">
-                          <summary className="cursor-pointer text-xs font-medium text-brand-violet hover:underline">
+                          <summary className="cursor-pointer text-xs font-medium text-brand-sky hover:underline">
                             Tam ders metni
                           </summary>
                           <div className="mt-2 whitespace-pre-wrap rounded-lg border border-slate-200 bg-white p-3 text-xs leading-relaxed text-slate-700 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-200">

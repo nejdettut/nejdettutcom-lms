@@ -4,7 +4,7 @@
   --color-brand-navy: #0f766e;
   --color-brand-turquoise: #0891b2;
   --color-brand-amber: #f59e0b;
-  --color-brand-violet: #0ea5e9;
+  --color-brand-sky: #0ea5e9;
 
   --color-surface: #ffffff;
   --color-surface-muted: #f1f5f9;
@@ -31,7 +31,7 @@ body {
   background:
     radial-gradient(
       1200px 600px at 10% -10%,
-      color-mix(in oklab, var(--color-brand-violet) 10%, transparent),
+      color-mix(in oklab, var(--color-brand-sky) 10%, transparent),
       transparent 60%
     ),
     radial-gradient(
@@ -49,7 +49,7 @@ body {
     background:
       radial-gradient(
         1200px 600px at 10% -10%,
-        color-mix(in oklab, var(--color-brand-violet) 18%, transparent),
+        color-mix(in oklab, var(--color-brand-sky) 18%, transparent),
         transparent 60%
       ),
       radial-gradient(

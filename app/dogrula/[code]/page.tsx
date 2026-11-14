@@ -77,7 +77,7 @@ export default async function VerifyPage({ params }: PageProps) {
             <CheckCircle2 className="size-8 text-emerald-600" />
           )}
           <div>
-            <p className="text-xs font-semibold uppercase tracking-widest text-brand-violet">
+            <p className="text-xs font-semibold uppercase tracking-widest text-brand-sky">
               Sertifika Doğrulama
             </p>
             <h1 className="mt-1 text-2xl font-bold tracking-tight text-slate-900 dark:text-slate-100">

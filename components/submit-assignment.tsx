@@ -61,10 +61,10 @@ export function SubmitAssignment({ assignment }: { assignment: Assignment }) {
   }
 
   return (
-    <div className="rounded-lg border border-brand-violet/30 bg-brand-violet/5 p-3">
+    <div className="rounded-lg border border-brand-sky/30 bg-brand-sky/5 p-3">
       <div className="mb-2 flex items-center gap-2">
-        <Send className="size-3.5 text-brand-violet" />
-        <p className="text-xs font-semibold uppercase tracking-wider text-brand-violet">
+        <Send className="size-3.5 text-brand-sky" />
+        <p className="text-xs font-semibold uppercase tracking-wider text-brand-sky">
           Ödev
         </p>
         {assignment.due_date ? (
@@ -150,7 +150,7 @@ export function SubmitAssignment({ assignment }: { assignment: Assignment }) {
             onClick={submit}
             disabled={loading || studentName.length < 2 || content.length < 20}
             className={cn(
-              "inline-flex items-center gap-1.5 rounded-lg bg-brand-violet px-3 py-1.5 text-xs font-semibold text-white transition hover:bg-brand-violet/90 disabled:cursor-not-allowed disabled:opacity-50",
+              "inline-flex items-center gap-1.5 rounded-lg bg-brand-sky px-3 py-1.5 text-xs font-semibold text-white transition hover:bg-brand-sky/90 disabled:cursor-not-allowed disabled:opacity-50",
             )}
           >
             {loading ? (

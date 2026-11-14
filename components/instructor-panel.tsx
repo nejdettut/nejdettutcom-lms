@@ -23,7 +23,7 @@ type Module = {
 };
 
 const BTN_PRIMARY =
-  "inline-flex items-center justify-center gap-1.5 rounded-lg bg-brand-navy px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-brand-navy/90 hover:shadow focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-violet focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 dark:bg-brand-violet dark:text-white";
+  "inline-flex items-center justify-center gap-1.5 rounded-lg bg-brand-navy px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-brand-navy/90 hover:shadow focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-sky focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 dark:bg-brand-sky dark:text-white";
 
 const BTN_OUTLINE =
   "inline-flex items-center justify-center gap-1.5 rounded-lg border border-slate-300 bg-white/70 px-3 py-1.5 text-xs font-medium text-slate-900 shadow-sm backdrop-blur transition hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-900/60 dark:text-slate-100 dark:hover:bg-slate-900";
@@ -284,10 +284,10 @@ export function InstructorPanel() {
               {(l.assignments ?? []).map((a, ai) => (
                 <div
                   key={ai}
-                  className="space-y-1.5 rounded border border-brand-violet/30 bg-brand-violet/5 p-2"
+                  className="space-y-1.5 rounded border border-brand-sky/30 bg-brand-sky/5 p-2"
                 >
                   <div className="flex items-center gap-2">
-                    <p className="flex-1 text-[11px] font-semibold uppercase tracking-wider text-brand-violet">
+                    <p className="flex-1 text-[11px] font-semibold uppercase tracking-wider text-brand-sky">
                       Ödev {ai + 1}
                     </p>
                     <button

@@ -6,7 +6,7 @@ export default function InstructorPage() {
   return (
     <main className="mx-auto max-w-5xl px-6 py-10 sm:py-14">
       <header className="mb-10">
-        <p className="text-xs font-semibold uppercase tracking-widest text-brand-violet">
+        <p className="text-xs font-semibold uppercase tracking-widest text-brand-sky">
           Eğitmen Paneli
         </p>
         <h1 className="mt-2 flex items-center gap-3 text-2xl font-bold tracking-tight text-slate-900 sm:text-3xl dark:text-slate-100">

@@ -40,7 +40,7 @@ export default async function HomePage() {
     <main className="mx-auto max-w-6xl px-6 py-10 sm:py-14">
       <header className="mb-10 flex flex-wrap items-start justify-between gap-4">
         <div>
-          <p className="text-xs font-semibold uppercase tracking-widest text-brand-violet">
+          <p className="text-xs font-semibold uppercase tracking-widest text-brand-sky">
             Yapay Zekâ Projesi · MVP
           </p>
           <h1 className="mt-2 flex items-center gap-3 text-2xl font-bold tracking-tight text-slate-900 sm:text-3xl dark:text-slate-100">
@@ -58,7 +58,7 @@ export default async function HomePage() {
         <div className="flex flex-wrap gap-2">
           <Link
             href="/yonetici"
-            className="rounded-full border border-brand-violet/40 bg-brand-violet/10 px-4 py-2 text-xs font-medium text-brand-violet transition hover:bg-brand-violet/20"
+            className="rounded-full border border-brand-sky/40 bg-brand-sky/10 px-4 py-2 text-xs font-medium text-brand-sky transition hover:bg-brand-sky/20"
           >
             Eğitmen Panel
           </Link>
@@ -73,13 +73,13 @@ export default async function HomePage() {
 
       <section>
         <h2 className="mb-4 flex items-center gap-2 text-sm font-semibold uppercase tracking-wider text-slate-700 dark:text-slate-200">
-          <GraduationCap className="size-4 text-brand-violet" />
+          <GraduationCap className="size-4 text-brand-sky" />
           Yayınlanan Kurslar
         </h2>
 
         {courses.length === 0 ? (
           <div className="flex flex-col items-center gap-3 rounded-2xl border border-dashed border-slate-300 bg-white/50 px-6 py-14 text-center backdrop-blur dark:border-slate-700 dark:bg-slate-900/40">
-            <BookOpen className="size-10 text-brand-violet" />
+            <BookOpen className="size-10 text-brand-sky" />
             <h3 className="font-semibold text-slate-900 dark:text-slate-100">
               Henüz yayınlanmış kurs yok
             </h3>
@@ -95,13 +95,13 @@ export default async function HomePage() {
               <Link
                 key={c.id}
                 href={`/kurs/${c.slug}`}
-                className="group rounded-2xl border border-slate-200 bg-white/80 p-5 shadow-sm backdrop-blur transition hover:border-brand-violet/60 hover:shadow dark:border-slate-800 dark:bg-slate-900/60 dark:hover:border-brand-violet"
+                className="group rounded-2xl border border-slate-200 bg-white/80 p-5 shadow-sm backdrop-blur transition hover:border-brand-sky/60 hover:shadow dark:border-slate-800 dark:bg-slate-900/60 dark:hover:border-brand-sky"
               >
                 <div className="flex items-start justify-between gap-2">
                   <h3 className="text-base font-bold text-slate-900 dark:text-slate-100">
                     {c.title}
                   </h3>
-                  <ChevronRight className="mt-1 size-4 shrink-0 text-slate-400 transition group-hover:text-brand-violet" />
+                  <ChevronRight className="mt-1 size-4 shrink-0 text-slate-400 transition group-hover:text-brand-sky" />
                 </div>
                 <p className="mt-2 line-clamp-2 text-sm text-slate-600 dark:text-slate-300">
                   {c.description}
