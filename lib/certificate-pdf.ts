@@ -1,25 +1,25 @@
 import "server-only";
-import { PDFDocument, rgb, StandardFonts } from "pdf-lib";
+import { PDFDocument, rgb } from "pdf-lib";
+import fontkit from "@pdf-lib/fontkit";
+import fs from "node:fs/promises";
+import path from "node:path";
 
-// pdf-lib StandardFonts use WinAnsi encoding; Turkish-specific glyphs
-// (ş, ı, ğ, ü, ö, ç, İ, ...) throw at draw time. Transliterate everything
-// we render so student/course names with Turkish chars don't break the PDF.
-// (Same fix as maarif OMR form PDF.)
-const TR_ASCII: Record<string, string> = {
-  "ı": "i", "İ": "I",
-  "ş": "s", "Ş": "S",
-  "ğ": "g", "Ğ": "G",
-  "ü": "u", "Ü": "U",
-  "ö": "o", "Ö": "O",
-  "ç": "c", "Ç": "C",
-  "·": "-", "—": "-", "–": "-",
-  "�": "?", // replacement char — appears when upstream encoding dropped bytes
-};
-function ascii(s: string): string {
-  // First replace known chars; then strip anything still outside WinAnsi safe range
-  // (0x20-0x7E ASCII + Latin-1 Supplement 0xA0-0xFF).
-  const mapped = s.replace(/[ıİşŞğĞüÜöÖçÇ·—–�]/g, (ch) => TR_ASCII[ch] ?? ch);
-  return mapped.replace(/[^\x20-\x7E\xA0-\xFF]/g, "?");
+// Inter is a Turkish-capable Unicode font embedded as TTF. StandardFonts
+// (Helvetica/TimesRoman) use WinAnsi encoding and throw on ş/ı/ğ/İ/ç.
+// Repair stray U+FFFD before drawing (appears if upstream encoding
+// mangled bytes during insert).
+function clean(s: string): string {
+  return s.replace(/�/g, "?");
+}
+
+const FONT_PATH = path.join(process.cwd(), "public", "fonts", "Inter-Variable.ttf");
+
+let cachedFontBytes: Uint8Array | null = null;
+async function loadFontBytes(): Promise<Uint8Array> {
+  if (cachedFontBytes) return cachedFontBytes;
+  const buf = await fs.readFile(FONT_PATH);
+  cachedFontBytes = new Uint8Array(buf);
+  return cachedFontBytes;
 }
 
 type Input = {
@@ -33,12 +33,14 @@ type Input = {
 
 export async function renderCertificatePdf(input: Input): Promise<Uint8Array> {
   const pdf = await PDFDocument.create();
+  pdf.registerFontkit(fontkit);
   // A4 landscape: 842 × 595 pt
   const page = pdf.addPage([842, 595]);
 
-  const serif = await pdf.embedFont(StandardFonts.TimesRomanBold);
-  const serifLight = await pdf.embedFont(StandardFonts.TimesRomanItalic);
-  const sans = await pdf.embedFont(StandardFonts.Helvetica);
+  const fontBytes = await loadFontBytes();
+  // Variable-axis TTF — single embed; we'll create visual hierarchy with
+  // size + color since pdf-lib doesn't drive variation axes.
+  const inter = await pdf.embedFont(fontBytes, { subset: true });
 
   const ink = rgb(0.059, 0.09, 0.165); // slate-900
   const accent = rgb(0.055, 0.647, 0.914); // sky-500
@@ -77,23 +79,23 @@ export async function renderCertificatePdf(input: Input): Promise<Uint8Array> {
     x: 70,
     y: 515,
     size: 26,
-    font: serif,
+    font: inter,
     color: accent,
   });
-  page.drawText(ascii("nejdettut.com · LMS"), {
+  page.drawText("nejdettut.com · LMS", {
     x: 100,
     y: 522,
     size: 11,
-    font: sans,
+    font: inter,
     color: ink,
   });
 
   // Title
-  page.drawText(ascii("Katılım Sertifikası"), {
+  page.drawText("Katılım Sertifikası", {
     x: 180,
     y: 420,
     size: 36,
-    font: serif,
+    font: inter,
     color: ink,
   });
 
@@ -102,7 +104,7 @@ export async function renderCertificatePdf(input: Input): Promise<Uint8Array> {
     x: 215,
     y: 395,
     size: 14,
-    font: serifLight,
+    font: inter,
     color: accent,
   });
 
@@ -111,41 +113,41 @@ export async function renderCertificatePdf(input: Input): Promise<Uint8Array> {
     x: 60,
     y: 340,
     size: 14,
-    font: sans,
+    font: inter,
     color: ink,
   });
 
   // Student name — centered
-  const name = ascii(input.studentName);
+  const name = clean(input.studentName);
   const nameSize = name.length > 40 ? 24 : name.length > 25 ? 32 : 40;
-  const nameWidth = serif.widthOfTextAtSize(name, nameSize);
+  const nameWidth = inter.widthOfTextAtSize(name, nameSize);
   page.drawText(name, {
     x: (842 - nameWidth) / 2,
     y: 285,
     size: nameSize,
-    font: serif,
+    font: inter,
     color: ink,
   });
 
   // Course line
-  const line2 = ascii(
+  const line2 = clean(
     `${input.courseTitle} kursunu başarıyla tamamlamıştır.`,
   );
-  const line2Width = sans.widthOfTextAtSize(line2, 14);
+  const line2Width = inter.widthOfTextAtSize(line2, 14);
   page.drawText(line2, {
     x: (842 - line2Width) / 2,
     y: 235,
     size: 14,
-    font: sans,
+    font: inter,
     color: ink,
   });
 
   // Footer: instructor + date
-  page.drawText(ascii(`Eğitmen: ${input.instructorName}`), {
+  page.drawText(`Eğitmen: ${clean(input.instructorName)}`, {
     x: 70,
     y: 160,
     size: 12,
-    font: sans,
+    font: inter,
     color: ink,
   });
   const dateStr = input.completedAt.toLocaleDateString("tr-TR", {
@@ -153,11 +155,11 @@ export async function renderCertificatePdf(input: Input): Promise<Uint8Array> {
     month: "long",
     day: "numeric",
   });
-  page.drawText(ascii(`Tamamlanma: ${dateStr}`), {
+  page.drawText(`Tamamlanma: ${dateStr}`, {
     x: 70,
     y: 142,
     size: 12,
-    font: sans,
+    font: inter,
     color: ink,
   });
 
@@ -170,34 +172,32 @@ export async function renderCertificatePdf(input: Input): Promise<Uint8Array> {
     borderColor: line,
     borderWidth: 0.6,
   });
-  page.drawText(ascii("Doğrulama"), {
+  page.drawText("Doğrulama", {
     x: 572,
     y: 160,
     size: 9,
-    font: sans,
+    font: inter,
     color: ink,
   });
   page.drawText(input.verificationCode, {
     x: 572,
     y: 138,
     size: 14,
-    font: serif,
+    font: inter,
     color: accent,
   });
   page.drawText(input.verifyUrl, {
     x: 572,
     y: 118,
     size: 8,
-    font: sans,
+    font: inter,
     color: ink,
   });
 
   // Page footer
   page.drawText(
-    ascii(
-      "nejdettut.com — Bu sertifika yukarıdaki kodla çevrimiçi doğrulanabilir.",
-    ),
-    { x: 70, y: 60, size: 9, font: sans, color: ink },
+    "nejdettut.com — Bu sertifika yukarıdaki kodla çevrimiçi doğrulanabilir.",
+    { x: 70, y: 60, size: 9, font: inter, color: ink },
   );
 
   return pdf.save();
