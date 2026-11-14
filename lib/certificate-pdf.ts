@@ -1,6 +1,23 @@
 import "server-only";
 import { PDFDocument, rgb, StandardFonts } from "pdf-lib";
 
+// pdf-lib StandardFonts use WinAnsi encoding; Turkish-specific glyphs
+// (ş, ı, ğ, ü, ö, ç, İ, ...) throw at draw time. Transliterate everything
+// we render so student/course names with Turkish chars don't break the PDF.
+// (Same fix as maarif OMR form PDF.)
+const TR_ASCII: Record<string, string> = {
+  "ı": "i", "İ": "I",
+  "ş": "s", "Ş": "S",
+  "ğ": "g", "Ğ": "G",
+  "ü": "u", "Ü": "U",
+  "ö": "o", "Ö": "O",
+  "ç": "c", "Ç": "C",
+  "·": "-", "—": "-", "–": "-",
+};
+function ascii(s: string): string {
+  return s.replace(/[ıİşŞğĞüÜöÖçÇ·—–]/g, (ch) => TR_ASCII[ch] ?? ch);
+}
+
 type Input = {
   verificationCode: string;
   studentName: string;
@@ -59,7 +76,7 @@ export async function renderCertificatePdf(input: Input): Promise<Uint8Array> {
     font: serif,
     color: accent,
   });
-  page.drawText("nejdettut.com · LMS", {
+  page.drawText(ascii("nejdettut.com · LMS"), {
     x: 100,
     y: 522,
     size: 11,
@@ -68,7 +85,7 @@ export async function renderCertificatePdf(input: Input): Promise<Uint8Array> {
   });
 
   // Title
-  page.drawText("Katılım Sertifikası", {
+  page.drawText(ascii("Katılım Sertifikası"), {
     x: 180,
     y: 420,
     size: 36,
@@ -95,7 +112,7 @@ export async function renderCertificatePdf(input: Input): Promise<Uint8Array> {
   });
 
   // Student name — centered
-  const name = input.studentName;
+  const name = ascii(input.studentName);
   const nameSize = name.length > 40 ? 24 : name.length > 25 ? 32 : 40;
   const nameWidth = serif.widthOfTextAtSize(name, nameSize);
   page.drawText(name, {
@@ -107,7 +124,9 @@ export async function renderCertificatePdf(input: Input): Promise<Uint8Array> {
   });
 
   // Course line
-  const line2 = `${input.courseTitle} kursunu başarıyla tamamlamıştır.`;
+  const line2 = ascii(
+    `${input.courseTitle} kursunu başarıyla tamamlamıştır.`,
+  );
   const line2Width = sans.widthOfTextAtSize(line2, 14);
   page.drawText(line2, {
     x: (842 - line2Width) / 2,
@@ -118,7 +137,7 @@ export async function renderCertificatePdf(input: Input): Promise<Uint8Array> {
   });
 
   // Footer: instructor + date
-  page.drawText(`Eğitmen: ${input.instructorName}`, {
+  page.drawText(ascii(`Eğitmen: ${input.instructorName}`), {
     x: 70,
     y: 160,
     size: 12,
@@ -130,7 +149,7 @@ export async function renderCertificatePdf(input: Input): Promise<Uint8Array> {
     month: "long",
     day: "numeric",
   });
-  page.drawText(`Tamamlanma: ${dateStr}`, {
+  page.drawText(ascii(`Tamamlanma: ${dateStr}`), {
     x: 70,
     y: 142,
     size: 12,
@@ -147,7 +166,7 @@ export async function renderCertificatePdf(input: Input): Promise<Uint8Array> {
     borderColor: line,
     borderWidth: 0.6,
   });
-  page.drawText("Doğrulama", {
+  page.drawText(ascii("Doğrulama"), {
     x: 572,
     y: 160,
     size: 9,
@@ -171,7 +190,9 @@ export async function renderCertificatePdf(input: Input): Promise<Uint8Array> {
 
   // Page footer
   page.drawText(
-    "nejdettut.com — Bu sertifika yukarıdaki kodla çevrimiçi doğrulanabilir.",
+    ascii(
+      "nejdettut.com — Bu sertifika yukarıdaki kodla çevrimiçi doğrulanabilir.",
+    ),
     { x: 70, y: 60, size: 9, font: sans, color: ink },
   );
 
