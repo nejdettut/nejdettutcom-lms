@@ -57,8 +57,8 @@ export async function renderCertificatePdf(input: Input): Promise<Uint8Array> {
   // Static Noto Sans — proper glyph outlines (variable fonts broke rendering
   // via pdf-lib fontkit). subset:true keeps PDF small by embedding only used
   // glyphs.
-  const sans = await pdf.embedFont(regBytes, { subset: true });
-  const sansBold = await pdf.embedFont(boldBytes, { subset: true });
+  const sans = await pdf.embedFont(regBytes, { subset: false });
+  const sansBold = await pdf.embedFont(boldBytes, { subset: false });
 
   const ink = rgb(0.059, 0.09, 0.165); // slate-900
   const accent = rgb(0.055, 0.647, 0.914); // sky-500
