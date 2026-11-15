@@ -1,7 +1,13 @@
-// Sertifika PDF — kod geçerli + iptal edilmemişse PDF döner, yoksa 404.
+// Sertifika PDF — Storage persist desteği (Aşama 3).
+// Akış: cert lookup → pdf_path varsa signed URL'e 302 redirect;
+// yoksa lazy backfill: üret + Storage'a yükle + pdf_path kaydet +
+// inline PDF dön (aynı request'te kullanıcı beklemesin).
 import "server-only";
 import { supabaseAdmin } from "@/lib/supabase";
-import { renderCertificatePdf } from "@/lib/certificate-pdf";
+import {
+  generateAndStoreCertificate,
+  signedCertificateUrl,
+} from "@/lib/certificate-storage";
 
 export const runtime = "nodejs";
 
@@ -24,7 +30,7 @@ export async function GET(
   const { data, error } = await sb
     .from("certificates")
     .select(
-      "verification_code, student_name, course_title, instructor_name, completed_at, revoked_at",
+      "verification_code, student_name, course_title, instructor_name, completed_at, revoked_at, pdf_path",
     )
     .eq("verification_code", normalized)
     .maybeSingle();
@@ -36,11 +42,30 @@ export async function GET(
     return json({ error: "Sertifika bulunamadı." }, 404);
   }
 
+  const slug = data.student_name
+    .toLocaleLowerCase("tr")
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-|-$/g, "") || "sertifika";
+  const fileName = `sertifika-${slug}-${data.verification_code}.pdf`;
+
+  // Fast path: Storage'da var → signed URL redirect (~50 ms)
+  if (data.pdf_path) {
+    const url = await signedCertificateUrl(sb, data.pdf_path, fileName);
+    if (url) {
+      return new Response(null, {
+        status: 302,
+        headers: { location: url },
+      });
+    }
+    // İmzalama başarısızsa fall-through: regenerate et
+  }
+
+  // Lazy backfill — eski sertifika veya Storage boş: üret + yükle + inline
   const baseUrl =
     process.env.NEXT_PUBLIC_SITE_URL ??
     `https://${process.env.VERCEL_URL ?? "lms.nejdettut.com"}`;
 
-  const bytes = await renderCertificatePdf({
+  const { bytes } = await generateAndStoreCertificate(sb, {
     verificationCode: data.verification_code,
     studentName: data.student_name,
     courseTitle: data.course_title,
@@ -49,16 +74,11 @@ export async function GET(
     verifyUrl: `${baseUrl}/dogrula/${data.verification_code}`,
   });
 
-  const slug = data.student_name
-    .toLocaleLowerCase("tr")
-    .replace(/[^a-z0-9]+/g, "-")
-    .replace(/^-|-$/g, "") || "sertifika";
-
   return new Response(new Uint8Array(bytes), {
     status: 200,
     headers: {
       "content-type": "application/pdf",
-      "content-disposition": `inline; filename="sertifika-${slug}-${data.verification_code}.pdf"`,
+      "content-disposition": `inline; filename="${fileName}"`,
       "cache-control": "no-store",
     },
   });

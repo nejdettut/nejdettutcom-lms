@@ -5,6 +5,7 @@ import "server-only";
 import { supabaseAdmin } from "@/lib/supabase";
 import { assertInstructorDual } from "@/lib/admin";
 import { rateLimit } from "@/lib/rate-limit";
+import { generateAndStoreCertificate } from "@/lib/certificate-storage";
 
 export const runtime = "nodejs";
 
@@ -110,9 +111,22 @@ export async function POST(req: Request) {
   const baseUrl =
     process.env.NEXT_PUBLIC_SITE_URL ??
     `https://${process.env.VERCEL_URL ?? "lms.nejdettut.com"}`;
+  const verifyUrl = `${baseUrl}/dogrula/${verificationCode}`;
+
+  // PDF'i hemen üret + Storage'a yükle. Başarısız olsa bile cert kaydı var;
+  // ilk PDF request'inde lazy backfill devreye girer.
+  await generateAndStoreCertificate(sb, {
+    verificationCode,
+    studentName,
+    courseTitle: course.title,
+    instructorName: course.instructor_name,
+    completedAt,
+    verifyUrl,
+  }).catch((err) => console.error("[cert/issue] store non-fatal:", err));
+
   return json({
     verificationCode,
     pdfUrl: `/api/certificates/pdf/${verificationCode}`,
-    verifyUrl: `${baseUrl}/dogrula/${verificationCode}`,
+    verifyUrl,
   });
 }
