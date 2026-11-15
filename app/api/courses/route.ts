@@ -2,7 +2,8 @@ import "server-only";
 import { generateText } from "ai";
 import { groq } from "@ai-sdk/groq";
 import { z } from "zod";
-import { assertInstructor, supabaseAdmin } from "@/lib/supabase";
+import { supabaseAdmin } from "@/lib/supabase";
+import { assertInstructorDual } from "@/lib/admin";
 import { slugify } from "@/lib/utils";
 import { rateLimit } from "@/lib/rate-limit";
 
@@ -60,8 +61,14 @@ async function aiSummary(content: string): Promise<string> {
 }
 
 export async function POST(req: Request) {
-  if (!assertInstructor(req)) {
-    return json({ error: "Yetkisiz: x-instructor-secret header eksik veya hatalı." }, 401);
+  if (!(await assertInstructorDual(req))) {
+    return json(
+      {
+        error:
+          "Yetkisiz. Lütfen /giris sayfasından Google ile eğitmen hesabıyla giriş yap veya x-instructor-secret header'ı doğru değer ile gönder.",
+      },
+      401,
+    );
   }
 
   const limited = await rateLimit({

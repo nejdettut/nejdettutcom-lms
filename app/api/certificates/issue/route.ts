@@ -2,7 +2,8 @@
 // Giriş: assignment_id + student_name (+ opsiyonel student_email).
 // Dönüş: { verificationCode, pdfUrl, verifyUrl }
 import "server-only";
-import { supabaseAdmin, assertInstructor } from "@/lib/supabase";
+import { supabaseAdmin } from "@/lib/supabase";
+import { assertInstructorDual } from "@/lib/admin";
 import { rateLimit } from "@/lib/rate-limit";
 
 export const runtime = "nodejs";
@@ -33,8 +34,14 @@ type Body = {
 };
 
 export async function POST(req: Request) {
-  if (!assertInstructor(req)) {
-    return json({ error: "Eğitmen kimliği doğrulanamadı." }, 401);
+  if (!(await assertInstructorDual(req))) {
+    return json(
+      {
+        error:
+          "Eğitmen kimliği doğrulanamadı. /giris sayfasından Google ile giriş yap veya x-instructor-secret header kullan.",
+      },
+      401,
+    );
   }
   const limited = await rateLimit({
     action: "certificate-issue",

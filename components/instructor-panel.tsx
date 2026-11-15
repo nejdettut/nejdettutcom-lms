@@ -33,7 +33,13 @@ const CARD =
 
 const MUTED_TEXT = "text-slate-500 dark:text-slate-400";
 
-export function InstructorPanel() {
+type Props = {
+  /** true → Google OAuth session mevcut (cookie); secret input gizlenir ve
+   * API çağrılarında `x-instructor-secret` header'ı gönderilmez. */
+  sessionAuthenticated?: boolean;
+};
+
+export function InstructorPanel({ sessionAuthenticated = false }: Props) {
   const [instructorSecret, setInstructorSecret] = useState("");
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
@@ -142,8 +148,11 @@ export function InstructorPanel() {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          "x-instructor-secret": instructorSecret,
+          ...(sessionAuthenticated
+            ? {}
+            : { "x-instructor-secret": instructorSecret }),
         },
+        credentials: sessionAuthenticated ? "include" : "same-origin",
         body: JSON.stringify({
           title,
           description,
@@ -173,22 +182,24 @@ export function InstructorPanel() {
 
   return (
     <div className="space-y-6">
-      <div className={cn(CARD, "p-5")}>
-        <h2 className="mb-3 text-sm font-semibold text-slate-900 dark:text-slate-100">
-          Eğitmen Anahtarı
-        </h2>
-        <input
-          type="password"
-          value={instructorSecret}
-          onChange={(e) => setInstructorSecret(e.target.value)}
-          placeholder="LMS_INSTRUCTOR_SECRET"
-          className="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm dark:border-slate-700 dark:bg-slate-950 dark:text-slate-100"
-        />
-        <p className={cn("mt-1 text-[11px]", MUTED_TEXT)}>
-          Vercel env&apos;deki LMS_INSTRUCTOR_SECRET değerini gir.
-          Tarayıcıda saklanmaz, sadece bu formu gönderirken header&apos;a eklenir.
-        </p>
-      </div>
+      {sessionAuthenticated ? null : (
+        <div className={cn(CARD, "p-5")}>
+          <h2 className="mb-3 text-sm font-semibold text-slate-900 dark:text-slate-100">
+            Eğitmen Anahtarı
+          </h2>
+          <input
+            type="password"
+            value={instructorSecret}
+            onChange={(e) => setInstructorSecret(e.target.value)}
+            placeholder="LMS_INSTRUCTOR_SECRET"
+            className="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm dark:border-slate-700 dark:bg-slate-950 dark:text-slate-100"
+          />
+          <p className={cn("mt-1 text-[11px]", MUTED_TEXT)}>
+            Vercel env&apos;deki LMS_INSTRUCTOR_SECRET değerini gir.
+            Tarayıcıda saklanmaz, sadece bu formu gönderirken header&apos;a eklenir.
+          </p>
+        </div>
+      )}
 
       <div className={cn(CARD, "p-5 space-y-3")}>
         <h2 className="text-sm font-semibold text-slate-900 dark:text-slate-100">
