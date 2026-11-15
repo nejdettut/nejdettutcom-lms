@@ -2,10 +2,18 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { supabaseAdmin } from "@/lib/supabase";
 import { SubmitAssignment } from "@/components/submit-assignment";
+import { LessonMaterials } from "@/components/lesson-materials";
 import { ArrowLeft, BookOpen, ChevronRight } from "lucide-react";
 
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
+
+type Material = {
+  id: string;
+  name: string;
+  mime: string;
+  size_bytes: number;
+};
 
 type Lesson = {
   id: string;
@@ -14,6 +22,7 @@ type Lesson = {
   ai_summary: string;
   position: number;
   assignments: Assignment[];
+  materials: Material[];
 };
 
 type Assignment = {
@@ -77,6 +86,12 @@ async function fetchCourse(slug: string): Promise<CourseDetail | null> {
           .from("assignments")
           .select("id, title, prompt, rubric, due_date")
           .eq("lesson_id", l.id);
+        const { data: materials } = await sb
+          .from("materials")
+          .select("id, name, mime, size_bytes")
+          .eq("lesson_id", l.id)
+          .order("position", { ascending: true })
+          .order("created_at", { ascending: true });
         lessonsWithAssignments.push({
           id: l.id,
           title: l.title,
@@ -84,6 +99,7 @@ async function fetchCourse(slug: string): Promise<CourseDetail | null> {
           ai_summary: l.ai_summary,
           position: l.position,
           assignments: (assignments ?? []) as Assignment[],
+          materials: (materials ?? []) as Material[],
         });
       }
       result.modules.push({
@@ -192,6 +208,10 @@ export default async function CoursePage({
                             {l.content}
                           </div>
                         </details>
+                      ) : null}
+
+                      {l.materials.length > 0 ? (
+                        <LessonMaterials materials={l.materials} />
                       ) : null}
 
                       {l.assignments.length > 0 ? (

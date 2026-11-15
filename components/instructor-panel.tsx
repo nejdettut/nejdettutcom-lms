@@ -377,10 +377,21 @@ export function InstructorPanel({ sessionAuthenticated = false }: Props) {
 
       {result ? (
         <div className="rounded-lg border border-emerald-400/40 bg-emerald-400/10 px-4 py-3 text-sm text-emerald-900 dark:border-emerald-400/30 dark:bg-emerald-400/10 dark:text-emerald-200">
-          Kurs oluşturuldu ✓{" "}
-          <a href={`/kurs/${result.slug}`} className="font-semibold underline">
-            /kurs/{result.slug}
-          </a>
+          <div>
+            Kurs oluşturuldu ✓{" "}
+            <a href={`/kurs/${result.slug}`} className="font-semibold underline">
+              /kurs/{result.slug}
+            </a>
+          </div>
+          <div className="mt-2 text-xs">
+            Dersin altına PDF/video/ek dosya eklemek için:{" "}
+            <a
+              href={`/yonetici/materyal/${result.slug}`}
+              className="font-semibold underline"
+            >
+              📎 Materyal yönet
+            </a>
+          </div>
         </div>
       ) : null}
 
